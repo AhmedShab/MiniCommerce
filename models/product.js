@@ -11,7 +11,7 @@ class Product {
   save() {
     const db = getDb();
 
-    db.collection('products')
+    return db.collection('products')
       .insertOne(this)
       .then(result => {
         console.log('Product saved:', result);
@@ -22,7 +22,18 @@ class Product {
   }
 
   static fetchAll() {
-    // Logic to fetch all products from the database
+    const db = getDb();
+
+    return db.collection('products')
+      .find()
+      .toArray()
+      .then(products => {
+        console.log('Products fetched:', products);
+        return products;
+      })
+      .catch(err => {
+        console.error('Error fetching products:', err);
+      });
   }
 
   static findById(id) {
