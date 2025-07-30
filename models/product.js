@@ -51,6 +51,32 @@ class Product {
         console.error('Error finding product:', err);
       });
   }
+
+  static updateById(id, updatedData) {
+    const db = getDb();
+
+    return db.collection('products')
+      .updateOne({ _id: new ObjectId(String(id)) }, { $set: updatedData })
+      .then(result => {
+        console.log('Product updated:', result);
+      })
+      .catch(err => {
+        console.error('Error updating product:', err);
+      });
+  }
+
+  static deleteById(id) {
+    const db = getDb();
+
+    return db.collection('products')
+      .deleteOne({ _id: new ObjectId(String(id)) })
+      .then(result => {
+        console.log('Product deleted:', result);
+      })
+      .catch(err => {
+        console.error('Error deleting product:', err);
+      });
+  }
 }
 
 module.exports = Product;
