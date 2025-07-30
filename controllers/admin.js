@@ -52,21 +52,13 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
-  Product.findById(prodId)
-    .then(product => {
-      // TODO: add validation
-      if (!product) {
-        return res.redirect('/');
-      }
-
-      Product.updateById(prodId, {
-        title: updatedTitle,
-        price: updatedPrice,
-        imageUrl: updatedImageUrl,
-        description: updatedDesc
-      })
+  Product.updateById(prodId, {
+      title: updatedTitle,
+      price: updatedPrice,
+      imageUrl: updatedImageUrl,
+      description: updatedDesc
     })
-    .then(result => {
+    .then(() => {
       console.log('UPDATED PRODUCT!');
       res.redirect('/admin/products');
     })
