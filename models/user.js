@@ -61,10 +61,16 @@ class User {
   getCart() {
     const db = getDb();
 
-    return db.collection('users')
-      .findOne({ _id: new ObjectId(String(this._id)) })
-      .then(user => {
-        return user.cart;
+    return db.collection('products')
+      .find({ _id: { $in: this.cart.items.map(item => item.productId) } })
+      .toArray()
+      .then(products => {
+        return products.map(product => {
+          return {
+            ...product,
+            quantity: this.cart.items.find(item => item.productId === product._id)
+          };
+        });
       })
       .catch(err => {
         console.error('Error fetching cart:', err);
