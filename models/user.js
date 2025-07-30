@@ -6,7 +6,7 @@ class User {
     this._id = id;
     this.name = name;
     this.email = email;
-    this.cart = cart;
+    this.cart = cart || { items: [] };
   }
 
   save() {
@@ -59,22 +59,48 @@ class User {
   }
 
   getCart() {
+    if (!this.cart || this.cart.items.length === 0) {
+      return Promise.resolve([]);
+    }
+
     const db = getDb();
+    const productId = this.cart.items.map(item => item.productId);
 
     return db.collection('products')
-      .find({ _id: { $in: this.cart.items.map(item => item.productId) } })
+      .find({ _id: { $in: productId } })
       .toArray()
       .then(products => {
         return products.map(product => {
           return {
             ...product,
-            quantity: this.cart.items.find(item => item.productId === product._id)
+            quantity: this.cart.items.find(item => item.productId.toString() === product._id.toString()).quantity
           };
         });
       })
       .catch(err => {
         console.error('Error fetching cart:', err);
       });
+  }
+
+  deleteItemFromCart(productId) {
+    const updatedCartItem = this.cart.items.filter(item => {
+      return item.productId.toString() !== productId.toString();
+    });
+
+    const db = getDb();
+
+    return db.collection('users')
+      .updateOne(
+        { _id: new ObjectId(String(this._id)) },
+        { $set: { cart: { items: updatedCartItem } } }
+      )
+      .then(users => {
+        console.log('Updated user: ', users);
+        
+      })
+      .catch(err => {
+        console.log(err);
+      })
   }
 
   static findById(userId) {
