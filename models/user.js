@@ -1,4 +1,11 @@
-const { ObjectId } = require('mongodb');
+ /**
+ * @typedef {Object} Order
+ * @property {ObjectId} userId
+ * @property {Object[]} items
+ */
+
+
+const { ObjectId, Collection } = require('mongodb');
 const { getDb } = require('../util/database');
 
 class User {
@@ -101,6 +108,48 @@ class User {
       .catch(err => {
         console.log(err);
       })
+  }
+
+  addOrder() {
+    const db = getDb();
+    return this.getCart().then(products => {
+      const order = {
+        user: {
+          _id: new ObjectId(String(this._id)),
+          name: this.name,
+          email: this.email
+        },
+        items: products
+      };
+      return db.collection('orders').insertOne(order);
+    })
+    .then(result => {
+        console.log('Order added:', result);
+        this.cart.items = [];
+
+        return db.collection('users')
+          .updateOne(
+            { _id: new ObjectId(String(this._id)) },
+            { $set: { cart: { items: [] } } }
+          );
+      })
+      .catch(err => {
+        console.error('Error adding order:', err);
+      });
+  }
+
+  getOrders() {
+    const db = getDb();
+    return db.collection('orders')
+      .find({ userId: new ObjectId(String(this._id)) })
+      .toArray()
+      .then(orders => {
+        console.log('Orders fetched:', orders);
+        return orders;
+      })
+      .catch(err => {
+        console.error('Error fetching orders:', err);
+      });
   }
 
   static findById(userId) {
