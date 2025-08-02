@@ -42,17 +42,18 @@ exports.getIndex = async (req, res, next) => {
   }
 };
 
-exports.getCart = (req, res, next) => {
-  req.user
-    .getCart()
-    .then(products => {
-      res.render('shop/cart', {
-        path: '/cart',
-        pageTitle: 'Your Cart',
-        products: products
-      });
-    })
-    .catch(err => console.log(err));
+exports.getCart = async (req, res, next) => {
+  try {
+    const user = await req.user.populate('cart.items.productId');
+
+    res.render('shop/cart', {
+      path: '/cart',
+      pageTitle: 'Your Cart',
+      products: user.cart.items
+    });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 exports.postCart = async (req, res, next) => {
