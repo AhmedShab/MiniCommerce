@@ -26,6 +26,38 @@ const userSchema = new Schema({
   }
 });
 
+userSchema.methods.addToCart = async function (product) {
+    const cartProductIndex = this.cart.items.findIndex(cp => {
+        return cp.productId.toString() === product._id.toString();
+    });
+
+    let newQuantity = 1;
+    let updateCartItems = [...this.cart.items];
+
+    if (cartProductIndex >= 0) {
+        newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+        updateCartItems[cartProductIndex].quantity = newQuantity;
+    } else {
+        updateCartItems.push({
+            productId: product._id,
+            quantity: newQuantity
+        });
+    }
+
+    const updatedCart = {
+        items: updateCartItems
+    };
+    this.cart = updatedCart;
+
+    try {
+        await this.save();
+        console.log('Cart updated successfully');
+    }
+    catch (err) {
+        console.error('Error updating cart:', err);
+    }
+}
+
 module.exports = mongoose.model('User', userSchema);
 
 //  /**
@@ -55,42 +87,6 @@ module.exports = mongoose.model('User', userSchema);
 //       })
 //       .catch(err => {
 //         console.error('Error saving user:', err);
-//       });
-//   }
-
-//   addToCart(product) {
-//     const cartProductIndex = this.cart.items.findIndex(cp => {
-//       return cp.productId.toString() === product._id.toString();
-//     });
-    
-//     let newQuantity = 1;
-//     let updateCartItems = [...this.cart.items];
-
-//     if (cartProductIndex >= 0) {
-//       newQuantity = this.cart.items[cartProductIndex].quantity + 1;
-//       updateCartItems[cartProductIndex].quantity = newQuantity;
-//     } else {
-//       updateCartItems.push({ 
-//         productId: new ObjectId(String(product._id)),
-//         quantity: newQuantity 
-//       });
-//     }
-
-//     const updatedCart = {
-//       items: updateCartItems
-//     };
-//     const db = getDb();
-
-//     return db.collection('users')
-//       .updateOne(
-//         { _id: new ObjectId(String(this._id)) },
-//         { $set: { cart: updatedCart } }
-//       )
-//       .then(result => {
-//         console.log('Cart updated:', result);
-//       })
-//       .catch(err => {
-//         console.error('Error updating cart:', err);
 //       });
 //   }
 

@@ -55,17 +55,16 @@ exports.getCart = (req, res, next) => {
     .catch(err => console.log(err));
 };
 
-exports.postCart = (req, res, next) => {
-  const prodId = req.body.productId;
-  Product.findById(prodId)
-    .then(product => {
-      return req.user.addToCart(product);
-    })
-    .then(() => {
-      console.log('Product added to cart');
-      res.redirect('/cart');
-    })
-    .catch(err => console.log(err));
+exports.postCart = async (req, res, next) => {
+  try {
+    const prodId = req.body.productId;
+    const product = await Product.findById(prodId);
+    await req.user.addToCart(product);
+    console.log('Product added to cart');
+    res.redirect('/cart');
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
