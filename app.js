@@ -35,6 +35,21 @@ app.use(session({
   })
 );
 
+app.use( async (req, res, next) => {
+  if (!req.session.user) {
+    return next();
+  }
+
+  const user = await User.findById(req.session.user._id);
+  if (user) {
+    req.user = user;
+    next();
+  } else {
+    next(new Error('User not found'));
+  }
+
+});
+
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);

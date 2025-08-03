@@ -48,7 +48,7 @@ exports.getIndex = async (req, res, next) => {
 
 exports.getCart = async (req, res, next) => {
   try {
-    const user = await req.session.user.populate('cart.items.productId');
+    const user = await req.user.populate('cart.items.productId');
 
     res.render('shop/cart', {
       path: '/cart',
@@ -65,7 +65,7 @@ exports.postCart = async (req, res, next) => {
   try {
     const prodId = req.body.productId;
     const product = await Product.findById(prodId);
-    await req.session.user.addToCart(product);
+    await req.user.addToCart(product);
     console.log('Product added to cart');
     res.redirect('/cart');
   } catch (err) {
@@ -75,7 +75,7 @@ exports.postCart = async (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  req.session.user
+  req.user
     .deleteItemFromCart(prodId)
     .then(() => {
       res.redirect('/cart');
@@ -84,7 +84,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.postOrder = async (req, res, next) => {
-  const user = await req.session.user.populate('cart.items.productId');
+  const user = await req.user.populate('cart.items.productId');
   const products = user.cart.items.map(item => {
     return { productData: item.productId.toObject(), quantity: item.quantity };
   });
@@ -92,13 +92,13 @@ exports.postOrder = async (req, res, next) => {
   try {
     const order = new Order({
       user: {
-        userId: req.session.user._id,
-        name: req.session.user.name,
-        email: req.session.user.email
+        userId: req.user._id,
+        name: req.user.name,
+        email: req.user.email
       },
       items: products
     });
-    await req.session.user.clearCart(); // Clear the cart after order creation
+    await req.user.clearCart(); // Clear the cart after order creation
 
     await order.save();
     res.redirect('/orders');
@@ -109,7 +109,7 @@ exports.postOrder = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const orders = await Order.getOrders(req.session.user._id);
+    const orders = await Order.getOrders(req.user._id);
 
     console.log('Orders fetched successfully: ', orders);
     res.render('shop/orders', {
