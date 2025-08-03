@@ -6,7 +6,7 @@ exports.getLogin = (req, res, next) => {
         pageTitle: 'Login',
         isAuthenticated: req.session.isLoggedIn
     });
-}
+};
 
 exports.postLogin = async (req, res, next) => {
     const email = req.body.email;
@@ -26,4 +26,13 @@ exports.postLogin = async (req, res, next) => {
     } catch (err) {
         console.log(err);
     }
-}
+};
+
+exports.postLogout = (req, res, next) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.log(err);
+        }
+        res.redirect('/');
+    });
+};
