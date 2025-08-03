@@ -9,16 +9,16 @@ exports.getLogin = (req, res, next) => {
 };
 
 exports.postLogin = async (req, res, next) => {
-    const email = req.body.email;
+    // const email = req.body.email;
     // const password = req.body.password;
 
     try {
-        req.session.isLoggedIn = true; // Set session variable
-        const user = await User.findOne({ email: email });
+        const user = await User.findOne({ _id: '688b85f75adbf85444f0bffe' });
 
         if (user) {
             req.session.user = user; // Store user in session
             req.session.isLoggedIn = true; // Set logged-in status
+            await req.session.save();
             res.redirect('/');
         } else {
             res.redirect('/login');
