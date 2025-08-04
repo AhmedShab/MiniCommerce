@@ -60,18 +60,6 @@ async function startServer() {
   try {
     await mongoose.connect(MONGODB_URI);
 
-    // only create a new user if it doesn't exist
-    const existingUser = await User.findOne();
-    if (!existingUser) {
-      // create a new user
-      const user = new User({
-        name: 'Ahmed',
-        email: 'ahmed@example.com',
-        cart: { items: [] }
-      });
-      user.save();
-    }
-    // else, use the existing user
     app.listen(3000, () => {
       console.log('Server is running on port 3000');
     });
