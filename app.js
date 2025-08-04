@@ -17,6 +17,7 @@ const store = new MongoDBStore({
   collection: 'sessions'
 });
 const csrfProtection = csrf();
+const flash = require('connect-flash');
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -37,6 +38,7 @@ app.use(session({
   })
 );
 app.use(csrfProtection);
+app.use(flash());
 
 app.use(async (req, res, next) => {
   if (!req.session.user) {

@@ -3,9 +3,12 @@ const bcrypt = require('bcryptjs');
 
 
 exports.getLogin = (req, res, next) => {
+    const errorMessage = req.flash('error')[0];
+
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
+        errorMessage,
     });
 };
 
@@ -24,6 +27,7 @@ exports.postLogin = async (req, res, next) => {
         const user = await User.findOne({ email });
 
         if (!user) {
+            req.flash('error', 'Invalid email or password');
             return res.redirect('/login');
         } else {
             const isValidPassword = await bcrypt.compare(password, user.password);
