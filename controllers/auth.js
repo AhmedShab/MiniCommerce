@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const bcrypt = require('bcryptjs');
+
 
 exports.getLogin = (req, res, next) => {
     res.render('auth/login', {
@@ -17,19 +19,26 @@ exports.getSignup = (req, res, next) => {
 };
 
 exports.postLogin = async (req, res, next) => {
-    const email = req.body.email;
-    // const password = req.body.password;
+    const { email, password } = req.body;
 
     try {
         const user = await User.findOne({ email });
 
-        if (user) {
+        if (!user) {
+            return res.redirect('/login');
+        } else {
+            const isValidPassword = await bcrypt.compare(password, user.password);
+
+            if (!isValidPassword) {
+                console.log('Invalid password');
+                return res.redirect('/login');
+            }
+
             req.session.user = user; // Store user in session
             req.session.isLoggedIn = true; // Set logged-in status
             await req.session.save();
+
             res.redirect('/');
-        } else {
-            res.redirect('/login');
         }
     } catch (err) {
         console.log(err);
@@ -55,9 +64,11 @@ exports.postSignup = async (req, res, next) => {
             return res.redirect('/login');
         }
 
+        const salt = await bcrypt.genSalt(12);
+        const hashPassword = await bcrypt.hash(password, salt);
         const newUser = new User({
             email,
-            password,
+            password: hashPassword,
         });
 
         await newUser.save();

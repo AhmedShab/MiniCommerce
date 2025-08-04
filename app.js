@@ -35,7 +35,7 @@ app.use(session({
   })
 );
 
-app.use( async (req, res, next) => {
+app.use(async (req, res, next) => {
   if (!req.session.user) {
     return next();
   }
@@ -45,7 +45,7 @@ app.use( async (req, res, next) => {
     req.user = user;
     next();
   } else {
-    next(new Error('User not found'));
+    next();
   }
 
 });
