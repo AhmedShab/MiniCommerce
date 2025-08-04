@@ -1,5 +1,10 @@
-const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+
+const sgMail = require('@sendgrid/mail');
+const User = require('../models/user')
+
+const transporter = sgMail;
+transporter.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 exports.getLogin = (req, res, next) => {
@@ -80,6 +85,12 @@ exports.postSignup = async (req, res, next) => {
         });
 
         await newUser.save();
+        await transporter.send({
+            to: email,
+            from: 'ahmed.vuw@gmail.com',
+            subject: 'Signup succeeded!',
+            html: '<h1>You successfully signed up!</h1>'
+        });
 
         res.redirect('/login');
 

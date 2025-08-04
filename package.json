@@ -14,12 +14,14 @@
     "nodemon": "^1.18.3"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
     "@types/express": "^5.0.3",
     "bcryptjs": "^3.0.2",
     "body-parser": "^1.18.3",
     "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^5.0.0",
     "csurf": "^1.11.0",
+    "dotenv": "^17.2.1",
     "ejs": "^2.6.1",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",

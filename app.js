@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
+const dotenv = require('dotenv');
 
 const MONGODB_URI = 'mongodb+srv://ahmed:xr7bfKQ2Qmbf5KS0@cluster0.zzmzliw.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0'
 
@@ -18,6 +19,8 @@ const store = new MongoDBStore({
 });
 const csrfProtection = csrf();
 const flash = require('connect-flash');
+
+dotenv.config();
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
