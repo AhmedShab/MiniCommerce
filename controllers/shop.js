@@ -8,7 +8,7 @@ exports.getProducts = async (req, res, next) => {
     res.render('shop/product-list', {
       prods: products,
       pageTitle: 'All Products',
-      path: '/products'
+      path: '/products',
     });
   } catch (err) {
     console.log(err);
@@ -22,7 +22,7 @@ exports.getProduct = async (req, res, next) => {
     res.render('shop/product-detail', {
       product: product,
       pageTitle: product.title,
-      path: '/products'
+      path: '/products',
     });
   } catch (err) {
     console.log(err);
@@ -35,7 +35,7 @@ exports.getIndex = async (req, res, next) => {
     res.render('shop/index', {
       prods: products,
       pageTitle: 'Shop',
-      path: '/'
+      path: '/',
     });
 
   } catch (err) {
@@ -50,7 +50,7 @@ exports.getCart = async (req, res, next) => {
     res.render('shop/cart', {
       path: '/cart',
       pageTitle: 'Your Cart',
-      products: user.cart.items
+      products: user.cart.items,
     });
   } catch (err) {
     console.log(err);
@@ -89,7 +89,6 @@ exports.postOrder = async (req, res, next) => {
     const order = new Order({
       user: {
         userId: req.user._id,
-        name: req.user.name,
         email: req.user.email
       },
       items: products
@@ -111,7 +110,7 @@ exports.getOrders = async (req, res, next) => {
     res.render('shop/orders', {
       path: '/orders',
       pageTitle: 'Your Orders',
-      orders: orders
+      orders: orders,
     });
   } catch (err) {
     console.log(err);
