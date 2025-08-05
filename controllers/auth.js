@@ -18,6 +18,11 @@ exports.getLogin = (req, res, next) => {
         path: '/login',
         pageTitle: 'Login',
         errorMessage,
+        oldInput: {
+            email: '',
+            password: ''
+        },
+        validationErrors: []
     });
 };
 
@@ -98,6 +103,11 @@ exports.postLogin = async (req, res, next) => {
             path: '/login',
             pageTitle: 'Login',
             errorMessage: errors.array()[0].msg,
+            oldInput: {
+                email: req.body.email,
+                password: req.body.password
+            },
+            validationErrors: errors.array(),
         });
     }
     res.redirect('/');
