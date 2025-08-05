@@ -42,20 +42,23 @@ app.use(session({
 );
 app.use(csrfProtection);
 app.use(flash());
-
 app.use(async (req, res, next) => {
   if (!req.session.user) {
     return next();
   }
 
-  const user = await User.findById(req.session.user._id);
-  if (user) {
+  try {
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+      return next();
+    }
     req.user = user;
     next();
-  } else {
-    next();
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
-
 });
 
 app.use((req, res, next) => {
@@ -64,11 +67,19 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/404', errorController.get404);
+app.use('/500', errorController.get500);
+
+app.use((error, req, res, next) => {
+  if (error.httpStatusCode === 500) {
+    return res.redirect('500');
+  }
+});
+
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
-app.use(errorController.get404);
 
 async function startServer() {
   try {

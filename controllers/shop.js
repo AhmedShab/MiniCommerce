@@ -11,7 +11,9 @@ exports.getProducts = async (req, res, next) => {
       path: '/products',
     });
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -25,7 +27,9 @@ exports.getProduct = async (req, res, next) => {
       path: '/products',
     });
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -39,7 +43,9 @@ exports.getIndex = async (req, res, next) => {
     });
 
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -53,7 +59,9 @@ exports.getCart = async (req, res, next) => {
       products: user.cart.items,
     });
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -65,18 +73,22 @@ exports.postCart = async (req, res, next) => {
     console.log('Product added to cart');
     res.redirect('/cart');
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
-exports.postCartDeleteProduct = (req, res, next) => {
-  const prodId = req.body.productId;
-  req.user
-    .deleteItemFromCart(prodId)
-    .then(() => {
-      res.redirect('/cart');
-    })
-    .catch(err => console.log(err));
+exports.postCartDeleteProduct = async (req, res, next) => {
+  try {
+    const prodId = req.body.productId;
+    await req.user.deleteItemFromCart(prodId);
+    res.redirect('/cart');
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
 exports.postOrder = async (req, res, next) => {
@@ -98,7 +110,9 @@ exports.postOrder = async (req, res, next) => {
     await order.save();
     res.redirect('/orders');
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
@@ -113,6 +127,8 @@ exports.getOrders = async (req, res, next) => {
       orders: orders,
     });
   } catch (err) {
-    console.log(err);
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
