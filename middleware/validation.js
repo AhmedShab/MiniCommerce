@@ -6,7 +6,6 @@ const User = require('../models/user');
 exports.signUp = [
     check('email')
         .isEmail()
-        .normalizeEmail()
         .withMessage('Please enter a valid email')
         .custom(async (value, { req }) => {
             const userDoc =  await User.findOne({ email: value });
@@ -36,7 +35,7 @@ exports.login = [
     check('email')
         .isEmail()
         .withMessage('Please enter a valid email')
-        .normalizeEmail()
+        .trim()
         .custom(async (value, { req }) => {
             const user = await User.findOne({ email: value });
     
@@ -60,4 +59,42 @@ exports.login = [
             req.session.isLoggedIn = true; // Set logged-in status
             await req.session.save();
         })
+]
+
+exports.addProduct = [
+    body('title')
+        .trim()
+        .isLength({ min: 3 })
+        .isString()
+        .trim()
+        .withMessage('Title must be at least 3 characters long'),
+    body('imageUrl')
+        .isURL()
+        .withMessage('Please enter a valid URL'),
+    body('price')
+        .isFloat({ gt: 0 })
+        .withMessage('Price must be a positive number'),
+    body('description')
+        .trim()
+        .isLength({ min: 5, max: 400 })
+        .withMessage('Description must be between 5 and 400 characters long')
+];
+
+exports.updateProduct = [
+    body('title')
+        .trim()
+        .isLength({ min: 3 })
+        .isString()
+        .trim()
+        .withMessage('Title must be at least 3 characters long'),
+    body('imageUrl')
+        .isURL()
+        .withMessage('Please enter a valid URL'),
+    body('price')
+        .isFloat({ gt: 0 })
+        .withMessage('Price must be a positive number'),
+    body('description')
+        .trim()
+        .isLength({ min: 5, max: 400 })
+        .withMessage('Description must be between 5 and 400 characters long')
 ]
