@@ -41,6 +41,49 @@ exports.getReset = (req, res, next) => {
     });
 };
 
+exports.getNewPassword = async(req, res, next) => {
+    const { token } = req.params;
+    const errorMessage = req.flash('error')[0] || null;
+    const user = await User.findOne({ resetToken: token, resetTokenExpiration: { $gt: Date.now() } });
+
+    if (!token) {
+        return res.redirect('/login');
+    }
+
+    if (!user) {
+        req.flash('error', 'Invalid email or password');
+        return res.redirect('/login');
+    }
+
+    res.render('auth/new-password', {
+        path: '/new-password',
+        pageTitle: 'New Password',
+        errorMessage,
+        userId: user._id,
+        token: user.resetToken
+    });
+};
+
+exports.postNewPassword = async(req, res, next) => {
+    const { password, userId, token } = req.body;
+
+    try {
+        const user = await User.findOne({ _id: userId, resetToken: token, resetTokenExpiration: { $gt: Date.now() } });
+
+        const salt = await bcrypt.genSalt(12);
+        const hashPassword = await bcrypt.hash(password, salt);
+        
+        user.password = hashPassword;
+        user.resetToken = undefined; // Clear reset token
+        user.resetTokenExpiration = undefined; // Clear expiration date
+
+        await user.save();
+        return res.redirect('/login');
+    } catch (err) {
+        console.log(err);
+    }
+};
+
 exports.postLogin = async (req, res, next) => {
     const { email, password } = req.body;
 
@@ -126,10 +169,8 @@ exports.postReset = async (req, res, next) => {
             return res.redirect('/reset');
         }
 
-        const date = new Date();
-
         user.resetToken = token;
-        user.resetTokenExpiration = new Date(date.getTime() + 3600000); // Token valid for 1 hour
+        user.resetTokenExpiration = new Date(Date.now() + 3600000); // Token valid for 1 hour
         await user.save();
 
         await transporter.send({
