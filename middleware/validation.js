@@ -6,6 +6,7 @@ const User = require('../models/user');
 exports.signUp = [
     check('email')
         .isEmail()
+        .normalizeEmail()
         .withMessage('Please enter a valid email')
         .custom(async (value, { req }) => {
             const userDoc =  await User.findOne({ email: value });
@@ -19,8 +20,10 @@ exports.signUp = [
     body('password', 'Please enter a password with numbers and text and at least 5 characters')
         .isLength({ min: 5 })
         .isAlphanumeric()
+        .trim()
     ,
     body('confirmPassword')
+        .trim()
         .custom((value, { req }) => {
             if (value !== req.body.password) {
                 throw new Error('Your passwords do not match');
@@ -33,6 +36,7 @@ exports.login = [
     check('email')
         .isEmail()
         .withMessage('Please enter a valid email')
+        .normalizeEmail()
         .custom(async (value, { req }) => {
             const user = await User.findOne({ email: value });
     
@@ -42,6 +46,7 @@ exports.login = [
         })
     ,
     body('password')
+        .trim()
         .custom(async (value, { req }) => {
 
             const user = await User.findOne({ email: req.body.email });
