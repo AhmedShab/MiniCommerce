@@ -61,7 +61,7 @@ exports.login = [
         })
 ]
 
-exports.addProduct = [
+exports.productForm = [
     body('title')
         .trim()
         .isLength({ min: 3 })
@@ -79,22 +79,3 @@ exports.addProduct = [
         .isLength({ min: 5, max: 400 })
         .withMessage('Description must be between 5 and 400 characters long')
 ];
-
-exports.updateProduct = [
-    body('title')
-        .trim()
-        .isLength({ min: 3 })
-        .isString()
-        .trim()
-        .withMessage('Title must be at least 3 characters long'),
-    body('imageUrl')
-        .isURL()
-        .withMessage('Please enter a valid URL'),
-    body('price')
-        .isFloat({ gt: 0 })
-        .withMessage('Price must be a positive number'),
-    body('description')
-        .trim()
-        .isLength({ min: 5, max: 400 })
-        .withMessage('Description must be between 5 and 400 characters long')
-]
