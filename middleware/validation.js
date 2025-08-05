@@ -1,0 +1,57 @@
+const { check, body } = require('express-validator');
+const bcrypt = require('bcryptjs');
+
+const User = require('../models/user');
+
+exports.signUp = [
+    check('email')
+        .isEmail()
+        .withMessage('Please enter a valid email')
+        .custom(async (value, { req }) => {
+            const userDoc =  await User.findOne({ email: value });
+
+            if (userDoc) {
+                return Promise.reject('Email already exists');
+            }
+        })
+    ,
+
+    body('password', 'Please enter a password with numbers and text and at least 5 characters')
+        .isLength({ min: 5 })
+        .isAlphanumeric()
+    ,
+    body('confirmPassword')
+        .custom((value, { req }) => {
+            if (value !== req.body.password) {
+                throw new Error('Your passwords do not match');
+            }
+            return true;
+        })
+];
+
+exports.login = [
+    check('email')
+        .withMessage('Please enter a valid email')
+        .custom(async (value, { req }) => {
+            const user = await User.findOne({ email: value });
+    
+            if (!user) {
+                return Promise.reject('Invalid email or password');
+            }
+        })
+    ,
+    body('password')
+        .custom(async (value, { req }) => {
+
+            const user = await User.findOne({ email: req.body.email });
+            const isValidPassword = await bcrypt.compare(value, user.password);
+
+            if (!isValidPassword) {
+                return Promise.reject('Invalid email or password');
+            }
+    
+            req.session.user = user; // Store user in session
+            req.session.isLoggedIn = true; // Set logged-in status
+            await req.session.save();
+        })
+]
