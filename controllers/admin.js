@@ -53,8 +53,8 @@ exports.postEditProduct = async (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
   try {
-    await Product.updateOne(
-      { _id: prodId },
+    const products = await Product.findOneAndUpdate(
+      { _id: prodId, userId: req.user._id },
       {
         title: updatedTitle,
         price: updatedPrice,
@@ -62,6 +62,11 @@ exports.postEditProduct = async (req, res, next) => {
         description: updatedDesc
       }
     );
+
+    if (!products) {
+      return res.redirect('/');
+    }
+    
     console.log('UPDATED PRODUCT!');
     res.redirect('/admin/products');
   } catch (err) {
@@ -71,7 +76,7 @@ exports.postEditProduct = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find({ userId: req.user._id });
     res.render('admin/products', {
       prods: products,
       pageTitle: 'Admin Products',
@@ -85,7 +90,7 @@ exports.getProducts = async (req, res, next) => {
 exports.postDeleteProduct = async (req, res, next) => {
   const prodId = req.body.productId;
   try {
-    await Product.deleteOne({ _id: prodId });
+    await Product.deleteOne({ _id: prodId, userId: req.user._id });
     console.log('DESTROYED PRODUCT');
     res.redirect('/admin/products');
   } catch (err) {
