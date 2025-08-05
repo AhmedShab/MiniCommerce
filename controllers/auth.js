@@ -28,7 +28,12 @@ exports.getSignup = (req, res, next) => {
         path: '/signup',
         pageTitle: 'Signup',
         isAuthenticated: false,
-        errorMessage
+        errorMessage,
+        oldInput: {
+            email: '',
+            password: '',
+            confirmPassword: ''
+        }
   });
 };
 
@@ -114,6 +119,11 @@ exports.postSignup = async (req, res, next) => {
             path: '/signup',
             pageTitle: 'Signup',
             errorMessage: errors.array()[0].msg,
+            oldInput: {
+                email,
+                password,
+                confirmPassword
+            }
         });
     }
 
