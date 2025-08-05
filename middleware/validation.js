@@ -31,6 +31,7 @@ exports.signUp = [
 
 exports.login = [
     check('email')
+        .isEmail()
         .withMessage('Please enter a valid email')
         .custom(async (value, { req }) => {
             const user = await User.findOne({ email: value });
