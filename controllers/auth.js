@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs');
 const sgMail = require('@sendgrid/mail');
 const User = require('../models/user')
 
+const { randomBytes } = require('crypto');
+const { promisify } = require('util');
+
 const transporter = sgMail;
 transporter.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -26,6 +29,16 @@ exports.getSignup = (req, res, next) => {
         isAuthenticated: false,
         errorMessage
   });
+};
+
+exports.getReset = (req, res, next) => {
+    const errorMessage = req.flash('error')[0] || null;
+
+    res.render('auth/reset', {
+        path: '/reset',
+        pageTitle: 'Reset Password',
+        errorMessage,
+    });
 };
 
 exports.postLogin = async (req, res, next) => {
@@ -96,5 +109,44 @@ exports.postSignup = async (req, res, next) => {
 
     } catch (err) {
         console.log(err);
+    }
+};
+
+exports.postReset = async (req, res, next) => {
+    const promisifyRandomBytes = promisify(randomBytes);
+    const { email } = req.body;
+
+    try {
+        const buffer = await promisifyRandomBytes(32);
+        const token = buffer.toString('hex');
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            req.flash('error', 'No account with that email found.');
+            return res.redirect('/reset');
+        }
+
+        const date = new Date();
+
+        user.resetToken = token;
+        user.resetTokenExpiration = new Date(date.getTime() + 3600000); // Token valid for 1 hour
+        await user.save();
+
+        await transporter.send({
+            to: email,
+            from: 'ahmed.vuw@gmail.com',
+            subject: 'Password Reset',
+            html: `
+                <h1>Password Reset</h1>
+                <p>You requested a password reset</p>
+                <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>
+            `
+        });
+
+        res.redirect('/login');
+
+    } catch (err) {
+        console.log(err);
+        return res.redirect('/reset');
     }
 };
