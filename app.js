@@ -1,4 +1,6 @@
 const path = require('path');
+const fs = require('fs');
+const https = require('https');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -8,9 +10,14 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
+const helmet = require('helmet');
 const dotenv = require('dotenv');
+const compression = require('compression');
+const morgan = require('morgan');
 
-const MONGODB_URI = 'mongodb+srv://ahmed:xr7bfKQ2Qmbf5KS0@cluster0.zzmzliw.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0'
+dotenv.config();
+
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.zzmzliw.mongodb.net/${process.env.MONGO_DEFAULT_DB}?retryWrites=true&w=majority&appName=Cluster0`
 
 const app = express();
 const store = new MongoDBStore({
@@ -20,7 +27,10 @@ const store = new MongoDBStore({
 const csrfProtection = csrf();
 const flash = require('connect-flash');
 
-dotenv.config();
+const privateKey = fs.readFileSync('server.key')
+const certificate = fs.readFileSync('server.cert');
+
+const User = require('./models/user');
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
@@ -29,15 +39,26 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
-const User = require('./models/user');
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, 'access.log'),
+  { flags: 'a' }
+);
 
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    imgSrc: ["'self'", "data:", "*"]
+  }
+}));
+app.use(compression());
+app.use(morgan('combined', { stream: accessLogStream }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-  secret: 'my secret',
-  resave: false,
-  saveUninitialized: false,
-  store: store
+    secret: 'my secret',
+    resave: false,
+    saveUninitialized: false,
+    store: store
   })
 );
 app.use(csrfProtection);
@@ -84,8 +105,10 @@ async function startServer() {
   try {
     await mongoose.connect(MONGODB_URI);
 
-    app.listen(3000, () => {
-      console.log('Server is running on port 3000');
+    https
+      .createServer({ key: privateKey, cert: certificate }, app)
+      .listen(process.env.PORT || 3000, () => {
+        console.log(`Server is running on port ${process.env.PORT || 3000}`);
     });
   } catch (err) {
     console.error('Failed to connect to MongoDB', err);
