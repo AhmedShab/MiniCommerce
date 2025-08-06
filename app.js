@@ -12,6 +12,9 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const { S3Client } = require('@aws-sdk/client-s3');
 const compression = require('compression');
 const morgan = require('morgan');
 
@@ -26,6 +29,31 @@ const store = new MongoDBStore({
 });
 const csrfProtection = csrf();
 const flash = require('connect-flash');
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  }
+});
+
+const fileStorage = multerS3({
+  s3: s3,
+  bucket: process.env.AWS_S3_BUCKET,
+  contentType: multerS3.AUTO_CONTENT_TYPE,
+  key: (req, file, cb) => {
+    cb(null, file.originalname);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
 
 const privateKey = fs.readFileSync('server.key')
 const certificate = fs.readFileSync('server.cert');
@@ -47,12 +75,13 @@ const accessLogStream = fs.createWriteStream(
 app.use(helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ["'self'"],
-    imgSrc: ["'self'", "data:", "*"]
+    imgSrc: ["'self'", "data:", "https://*.s3.eu-north-1.amazonaws.com"],
   }
 }));
 app.use(compression());
 app.use(morgan('combined', { stream: accessLogStream }));
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
     secret: 'my secret',

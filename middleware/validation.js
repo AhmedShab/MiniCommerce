@@ -68,9 +68,6 @@ exports.productForm = [
         .isString()
         .trim()
         .withMessage('Title must be at least 3 characters long'),
-    body('imageUrl')
-        .isURL()
-        .withMessage('Please enter a valid URL'),
     body('price')
         .isFloat({ gt: 0 })
         .withMessage('Price must be a positive number'),

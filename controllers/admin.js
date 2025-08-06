@@ -14,7 +14,7 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = async (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const imageUrl = req.file.location;
   const price = req.body.price;
   const description = req.body.description;
   const product = new Product({ title, price, imageUrl, description, userId: req.user._id });
@@ -28,7 +28,6 @@ exports.postAddProduct = async (req, res, next) => {
       product: {
         title,
         price,
-        imageUrl,
         description
       },
       hasError: true,
@@ -79,7 +78,7 @@ exports.postEditProduct = async (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
+  const updatedImageUrl = req.file ? req.file.location : null;
   const updatedDesc = req.body.description;
   const errors = validationResult(req);
 
@@ -91,7 +90,6 @@ exports.postEditProduct = async (req, res, next) => {
         product: {
           title: updatedTitle,
           price: updatedPrice,
-          imageUrl: updatedImageUrl,
           description: updatedDesc,
           _id: prodId
         },
@@ -102,20 +100,18 @@ exports.postEditProduct = async (req, res, next) => {
   }
 
   try {
-    const products = await Product.findOneAndUpdate(
-      { _id: prodId, userId: req.user._id },
-      {
-        title: updatedTitle,
-        price: updatedPrice,
-        imageUrl: updatedImageUrl,
-        description: updatedDesc
-      }
-    );
-
-    if (!products) {
+    const product = await Product.findById(prodId);
+    if (product.userId.toString() !== req.user._id.toString()) {
       return res.redirect('/');
     }
-    
+    product.title = updatedTitle;
+    product.price = updatedPrice;
+    product.description = updatedDesc;
+
+    if (updatedImageUrl) {
+      product.imageUrl = updatedImageUrl;
+    }
+    product.save();
     console.log('UPDATED PRODUCT!');
     res.redirect('/admin/products');
   } catch (err) {
