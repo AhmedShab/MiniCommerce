@@ -191,7 +191,7 @@ exports.postReset = async (req, res, next) => {
             html: `
                 <h1>Password Reset</h1>
                 <p>You requested a password reset</p>
-                <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>
+                <p>Click this <a href="${process.env.REST_URL}/reset/${token}">link</a> to set a new password.</p>
             `
         });
 
