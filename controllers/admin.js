@@ -38,7 +38,6 @@ exports.postAddProduct = async (req, res, next) => {
 
   try {
     await product.save();
-    console.log('Created Product');
     res.redirect('/admin/products');
   } catch (err) {
     const error = new Error(err);
@@ -112,7 +111,6 @@ exports.postEditProduct = async (req, res, next) => {
       product.imageUrl = updatedImageUrl;
     }
     product.save();
-    console.log('UPDATED PRODUCT!');
     res.redirect('/admin/products');
   } catch (err) {
     const error = new Error(err);
@@ -140,7 +138,6 @@ exports.postDeleteProduct = async (req, res, next) => {
   const prodId = req.body.productId;
   try {
     await Product.deleteOne({ _id: prodId, userId: req.user._id });
-    console.log('DESTROYED PRODUCT');
     res.redirect('/admin/products');
   } catch (err) {
     const error = new Error(err);

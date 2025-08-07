@@ -63,7 +63,6 @@ userSchema.methods.addToCart = async function (product) {
 
     try {
         await this.save();
-        console.log('Cart updated successfully');
     }
     catch (err) {
         console.error('Error updating cart:', err);
@@ -78,7 +77,6 @@ userSchema.methods.deleteItemFromCart = async function (productId) {
     this.cart.items = updatedCartItem;
     try {
         await this.save();
-        console.log('Item deleted from cart successfully');
     }
     catch (err) {
         console.error('Error deleting item from cart:', err);
@@ -89,7 +87,6 @@ userSchema.methods.clearCart = async function () {
     this.cart = { items: [] };
     try {
         await this.save();
-        console.log('Cart cleared successfully');
     } catch (err) {
         console.error('Error clearing cart:', err);
     }

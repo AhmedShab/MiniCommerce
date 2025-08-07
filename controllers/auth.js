@@ -118,7 +118,9 @@ exports.postLogin = async (req, res, next) => {
 exports.postLogout = (req, res, next) => {
     req.session.destroy(err => {
         if (err) {
-            console.log(err);
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
         }
         res.redirect('/');
     });

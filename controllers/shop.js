@@ -70,7 +70,6 @@ exports.postCart = async (req, res, next) => {
     const prodId = req.body.productId;
     const product = await Product.findById(prodId);
     await req.user.addToCart(product);
-    console.log('Product added to cart');
     res.redirect('/cart');
   } catch (err) {
     const error = new Error(err);
@@ -120,7 +119,6 @@ exports.getOrders = async (req, res, next) => {
   try {
     const orders = await Order.getOrders(req.user._id);
 
-    console.log('Orders fetched successfully: ', orders);
     res.render('shop/orders', {
       path: '/orders',
       pageTitle: 'Your Orders',
