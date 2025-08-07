@@ -63,7 +63,7 @@ Before running this application, make sure you have:
    SENDGRID_API_KEY=your_sendgrid_api_key
    MONGO_USER=your_mongodb_username
    MONGO_PASS=your_mongodb_password
-   MONGO_DEFAULT_DB=shop
+   MONGO_DEFAULT_DB=your_database_name
    AWS_S3_BUCKET=your_s3_bucket_name
    AWS_ACCESS_KEY_ID=your_aws_access_key
    AWS_SECRET_ACCESS_KEY=your_aws_secret_key
