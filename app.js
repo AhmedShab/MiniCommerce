@@ -55,9 +55,6 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const privateKey = fs.readFileSync('server.key')
-const certificate = fs.readFileSync('server.cert');
-
 const User = require('./models/user');
 
 app.set('view engine', 'ejs');
@@ -134,9 +131,7 @@ async function startServer() {
   try {
     await mongoose.connect(MONGODB_URI);
 
-    https
-      .createServer({ key: privateKey, cert: certificate }, app)
-      .listen(process.env.PORT || 3000, () => {
+    app.listen(process.env.PORT || 3000, () => {
         console.log(`Server is running on port ${process.env.PORT || 3000}`);
     });
   } catch (err) {
